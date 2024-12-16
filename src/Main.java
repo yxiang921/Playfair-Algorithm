@@ -21,8 +21,16 @@ public class Main extends JFrame {
 
         // Create panels
         JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 10));
-        JPanel centerPanel = new JPanel(new GridLayout(2, 3, 10, 10));
+        JPanel centerPanel = new JPanel(new GridLayout(1, 3, 10, 10));
         JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
+
+        JPanel centerLeftPanel = new JPanel();
+        JPanel centerMiddlePanel = new JPanel();
+        JPanel centerRightPanel = new JPanel();
+
+        centerLeftPanel.setLayout(new BoxLayout(centerLeftPanel, BoxLayout.Y_AXIS));
+        centerMiddlePanel.setLayout(new BoxLayout(centerMiddlePanel, BoxLayout.Y_AXIS));
+        centerRightPanel.setLayout(new BoxLayout(centerRightPanel, BoxLayout.Y_AXIS));
 
         // Keyword input
         topPanel.add(new JLabel("Keyword:"));
@@ -51,13 +59,22 @@ public class Main extends JFrame {
 
         inputTextArea.setText("Enter text here");
 
-        centerPanel.add(new JLabel("Key Matrix:"));
-        centerPanel.add(new JLabel("Input Text:"));
-        centerPanel.add(new JLabel("Output Text:"));
+        centerLeftPanel.add(new JLabel("Key Matrix:"));
+        centerMiddlePanel.add(new JLabel("Input Text:"));
+        centerRightPanel.add(new JLabel("Output Text: "));
 
-        centerPanel.add(new JScrollPane(matrixDisplayArea));
-        centerPanel.add(new JScrollPane(inputTextArea));
-        centerPanel.add(new JScrollPane(outputTextArea));
+        centerLeftPanel.add(new JScrollPane(matrixDisplayArea));
+        centerMiddlePanel.add(new JScrollPane(inputTextArea));
+        centerRightPanel.add(new JScrollPane(outputTextArea));
+
+        centerLeftPanel.add(Box.createVerticalStrut(10));
+        centerMiddlePanel.add(Box.createVerticalStrut(10));
+        centerRightPanel.add(Box.createVerticalStrut(10));
+
+        centerPanel.add(centerLeftPanel);
+        centerPanel.add(centerMiddlePanel);
+        centerPanel.add(centerRightPanel);
+
 
         // Process button
         JButton processButton = new JButton("Process");
@@ -91,9 +108,9 @@ public class Main extends JFrame {
         StringBuilder matrixStr = new StringBuilder();
         for (int i = 0; i < MATRIX_SIZE; i++) {
             for (int j = 0; j < MATRIX_SIZE; j++) {
-                matrixStr.append(keyMatrix[i][j]).append(" ");
+                matrixStr.append(keyMatrix[i][j]).append("   ");
             }
-            matrixStr.append("\n");
+            matrixStr.append("\n\n");
         }
         matrixDisplayArea.setText(matrixStr.toString());
     }
