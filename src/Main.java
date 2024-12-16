@@ -21,7 +21,7 @@ public class Main extends JFrame {
 
         // Create panels
         JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 10));
-        JPanel centerPanel = new JPanel(new GridLayout(2, 2, 10, 10));
+        JPanel centerPanel = new JPanel(new GridLayout(2, 3, 10, 10));
         JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
 
         // Keyword input
@@ -51,17 +51,13 @@ public class Main extends JFrame {
 
         inputTextArea.setText("Enter text here");
 
+        centerPanel.add(new JLabel("Key Matrix:"));
         centerPanel.add(new JLabel("Input Text:"));
         centerPanel.add(new JLabel("Output Text:"));
+
+        centerPanel.add(new JScrollPane(matrixDisplayArea));
         centerPanel.add(new JScrollPane(inputTextArea));
         centerPanel.add(new JScrollPane(outputTextArea));
-
-        // Matrix display panel
-        JPanel matrixPanel = new JPanel(new BorderLayout());
-        matrixPanel.add(new JLabel("Key Matrix:"), BorderLayout.NORTH);
-        matrixPanel.add(new JScrollPane(matrixDisplayArea), BorderLayout.CENTER);
-
-        matrixPanel.setSize(200, 200);
 
         // Process button
         JButton processButton = new JButton("Process");
@@ -71,7 +67,6 @@ public class Main extends JFrame {
         // Add all panels to frame
         add(topPanel, BorderLayout.NORTH);
         add(centerPanel, BorderLayout.CENTER);
-        add(matrixPanel, BorderLayout.EAST);
         add(bottomPanel, BorderLayout.SOUTH);
 
         // Add key listener for keyword field
