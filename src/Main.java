@@ -1,43 +1,124 @@
-import java.util.Scanner;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
 
-public class Main {
+public class Main extends JFrame {
     private static final int MATRIX_SIZE = 5;
     private char[][] keyMatrix = new char[MATRIX_SIZE][MATRIX_SIZE];
     private String keyword;
 
-    public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
-        Main cipher = new Main();
+    private JTextField keywordField;
+    private JTextArea inputTextArea;
+    private JTextArea outputTextArea;
+    private JTextArea matrixDisplayArea;
+    private JRadioButton encryptButton;
+    private JRadioButton decryptButton;
 
-        System.out.print("Please Enter a Keyword: ");
-        cipher.keyword = scanner.nextLine().toUpperCase().replaceAll("[^A-Z]", "").replace("J", "I");
+    public Main() {
+        setTitle("Playfair Cipher");
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLayout(new BorderLayout(10, 10));
 
-        cipher.getMatrixWithKey();
+        // Create panels
+        JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 10));
+        JPanel centerPanel = new JPanel(new GridLayout(2, 2, 10, 10));
+        JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
 
-        System.out.println("Do you want encrypt or decrypt? (Enter the number):");
-        System.out.println("1. Encrypt");
-        System.out.println("2. Decrypt");
+        // Keyword input
+        topPanel.add(new JLabel("Keyword:"));
+        keywordField = new JTextField(20);
+        topPanel.add(keywordField);
 
-        try{
-            int choice = scanner.nextInt();
-            scanner.nextLine();
+        // Radio buttons for mode selection
+        encryptButton = new JRadioButton("Encrypt", true);
+        decryptButton = new JRadioButton("Decrypt");
+        ButtonGroup group = new ButtonGroup();
+        group.add(encryptButton);
+        group.add(decryptButton);
+        JPanel radioPanel = new JPanel();
+        radioPanel.add(encryptButton);
+        radioPanel.add(decryptButton);
+        topPanel.add(radioPanel);
 
-            System.out.print("Enter text: ");
-            String plaintext = scanner.nextLine().toUpperCase().replaceAll("[^A-Z]", "").replace("J", "I");
+        // Text areas
+        inputTextArea = new JTextArea(10, 30);
+        outputTextArea = new JTextArea(10, 30);
+        outputTextArea.setEditable(false);
+        matrixDisplayArea = new JTextArea(20, 30);
+        matrixDisplayArea.setEditable(false);
 
-            if (choice == 1) {
-                System.out.println("Encrypted text: " + cipher.encrypt(plaintext));
-            } else if (choice == 2) {
-                System.out.println("Decrypted text: " + cipher.decrypt(plaintext));
-            } else {
-                System.out.println("Invalid choice.");
+        matrixDisplayArea.setFont(new Font("Monospaced", Font.PLAIN, 20));
+
+        inputTextArea.setText("Enter text here");
+
+        centerPanel.add(new JLabel("Input Text:"));
+        centerPanel.add(new JLabel("Output Text:"));
+        centerPanel.add(new JScrollPane(inputTextArea));
+        centerPanel.add(new JScrollPane(outputTextArea));
+
+        // Matrix display panel
+        JPanel matrixPanel = new JPanel(new BorderLayout());
+        matrixPanel.add(new JLabel("Key Matrix:"), BorderLayout.NORTH);
+        matrixPanel.add(new JScrollPane(matrixDisplayArea), BorderLayout.CENTER);
+
+        matrixPanel.setSize(200, 200);
+
+        // Process button
+        JButton processButton = new JButton("Process");
+        processButton.addActionListener(e -> processText());
+        bottomPanel.add(processButton);
+
+        // Add all panels to frame
+        add(topPanel, BorderLayout.NORTH);
+        add(centerPanel, BorderLayout.CENTER);
+        add(matrixPanel, BorderLayout.EAST);
+        add(bottomPanel, BorderLayout.SOUTH);
+
+        // Add key listener for keyword field
+        keywordField.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyReleased(KeyEvent e) {
+                updateMatrix();
             }
-        }catch(Exception e){
-            System.out.println("Invalid Input");
-            System.exit(0);
-        }
+        });
 
-        scanner.close();
+        pack();
+        setLocationRelativeTo(null);
+    }
+
+    private void updateMatrix() {
+        keyword = keywordField.getText().toUpperCase().replaceAll("[^A-Z]", "").replace("J", "I");
+        getMatrixWithKey();
+        displayMatrix();
+    }
+
+    private void displayMatrix() {
+        StringBuilder matrixStr = new StringBuilder();
+        for (int i = 0; i < MATRIX_SIZE; i++) {
+            for (int j = 0; j < MATRIX_SIZE; j++) {
+                matrixStr.append(keyMatrix[i][j]).append(" ");
+            }
+            matrixStr.append("\n");
+        }
+        matrixDisplayArea.setText(matrixStr.toString());
+    }
+
+    private void processText() {
+        try {
+            String input = inputTextArea.getText().toUpperCase().replaceAll("[^A-Z]", "").replace("J", "I");
+            String result;
+
+            if (encryptButton.isSelected()) {
+                result = encrypt(input);
+            } else {
+                result = decrypt(input);
+            }
+
+            outputTextArea.setText(result);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Error processing text: " + e.getMessage(),
+                    "Error", JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     private void getMatrixWithKey() {
@@ -129,5 +210,11 @@ public class Main {
             }
         }
         throw new IllegalArgumentException("Character not found in key matrix: " + c);
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> {
+            new Main().setVisible(true);
+        });
     }
 }
