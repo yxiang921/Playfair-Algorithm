@@ -49,16 +49,38 @@ public class Main extends JFrame {
         topPanel.add(radioPanel);
 
         // Text areas
-        inputTextArea = new JTextArea(10, 30);
-        outputTextArea = new JTextArea(10, 30);
-        outputTextArea.setEditable(false);
-        matrixDisplayArea = new JTextArea(20, 30);
-        matrixDisplayArea.setEditable(false);
+        inputTextArea = new JTextArea(15, 30);
+        inputTextArea.setText("Enter text here");
+        inputTextArea.setForeground(Color.GRAY);
+        inputTextArea.setLineWrap(true);
+        inputTextArea.addFocusListener(new FocusListener() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                if (inputTextArea.getText().equals("Enter text here")) {
+                    inputTextArea.setText("");
+                    inputTextArea.setForeground(Color.BLACK);
+                }
+            }
 
+            @Override
+            public void focusLost(FocusEvent e) {
+                if (inputTextArea.getText().isEmpty()) {
+                    inputTextArea.setText("Enter text here");
+                    inputTextArea.setForeground(Color.GRAY);
+                }
+            }
+        });
+
+        outputTextArea = new JTextArea(15, 30);
+        outputTextArea.setEditable(false);
+        outputTextArea.setLineWrap(true);
+
+        // Matrix display area
+        matrixDisplayArea = new JTextArea(15, 30);
+        matrixDisplayArea.setEditable(false);
         matrixDisplayArea.setFont(new Font("Monospaced", Font.PLAIN, 20));
 
-        inputTextArea.setText("Enter text here");
-
+        // Add components to center panels
         centerLeftPanel.add(new JLabel("Key Matrix:"));
         centerMiddlePanel.add(new JLabel("Input Text:"));
         centerRightPanel.add(new JLabel("Output Text: "));
@@ -74,7 +96,6 @@ public class Main extends JFrame {
         centerPanel.add(centerLeftPanel);
         centerPanel.add(centerMiddlePanel);
         centerPanel.add(centerRightPanel);
-
 
         // Process button
         JButton processButton = new JButton("Process");
@@ -99,7 +120,7 @@ public class Main extends JFrame {
     }
 
     private void updateMatrix() {
-        keyword = keywordField.getText().toUpperCase().replaceAll("[^A-Z]", "").replace("J", "I");
+        keyword = keywordField.getText().toUpperCase().replaceAll("[^A-Z]", "").replace("J", "K");
         getMatrixWithKey();
         displayMatrix();
     }
@@ -117,7 +138,7 @@ public class Main extends JFrame {
 
     private void processText() {
         try {
-            String input = inputTextArea.getText().toUpperCase().replaceAll("[^A-Z]", "").replace("J", "I");
+            String input = inputTextArea.getText().toUpperCase().replaceAll("[^A-Z]", "").replace("J", "K");
             String result;
 
             if (encryptButton.isSelected()) {
