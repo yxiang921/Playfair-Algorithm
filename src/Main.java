@@ -120,7 +120,7 @@ public class Main extends JFrame {
     }
 
     private void updateMatrix() {
-        keyword = keywordField.getText().toUpperCase().replaceAll("[^A-Z]", "").replace("J", "K");
+        keyword = keywordField.getText().toUpperCase().replaceAll("[^A-Z]", "").replace("Q", "P");
         getMatrixWithKey();
         displayMatrix();
     }
@@ -138,7 +138,7 @@ public class Main extends JFrame {
 
     private void processText() {
         try {
-            String input = inputTextArea.getText().toUpperCase().replaceAll("[^A-Z]", "").replace("J", "K");
+            String input = inputTextArea.getText().toUpperCase().replaceAll("[^A-Z]", "").replace("Q", "P");
             String result;
 
             if (encryptButton.isSelected()) {
@@ -167,7 +167,7 @@ public class Main extends JFrame {
         }
 
         for (char c = 'A'; c <= 'Z'; c++) {
-            if (c == 'J') continue;
+            if (c == 'Q') continue;
             if (!used[c - 'A']) {
                 keyMatrix[index / MATRIX_SIZE][index % MATRIX_SIZE] = c;
                 used[c - 'A'] = true;
