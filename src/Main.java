@@ -1,6 +1,8 @@
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.*;
+import java.util.List;
 
 public class Main extends JFrame {
     private static final int MATRIX_SIZE = 5;
@@ -19,7 +21,6 @@ public class Main extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout(10, 10));
 
-        // Create panels
         JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 10));
         JPanel centerPanel = new JPanel(new GridLayout(1, 3, 10, 10));
         JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
@@ -32,23 +33,10 @@ public class Main extends JFrame {
         centerMiddlePanel.setLayout(new BoxLayout(centerMiddlePanel, BoxLayout.Y_AXIS));
         centerRightPanel.setLayout(new BoxLayout(centerRightPanel, BoxLayout.Y_AXIS));
 
-        // Keyword input
         topPanel.add(new JLabel("Keyword:"));
         keywordField = new JTextField(20);
         topPanel.add(keywordField);
 
-        // Radio buttons for mode selection
-        encryptButton = new JRadioButton("Encrypt", true);
-        decryptButton = new JRadioButton("Decrypt");
-        ButtonGroup group = new ButtonGroup();
-        group.add(encryptButton);
-        group.add(decryptButton);
-        JPanel radioPanel = new JPanel();
-        radioPanel.add(encryptButton);
-        radioPanel.add(decryptButton);
-        topPanel.add(radioPanel);
-
-        // Text areas
         inputTextArea = new JTextArea(15, 30);
         inputTextArea.setText("Enter text here");
         inputTextArea.setForeground(Color.GRAY);
@@ -74,13 +62,12 @@ public class Main extends JFrame {
         outputTextArea = new JTextArea(15, 30);
         outputTextArea.setEditable(false);
         outputTextArea.setLineWrap(true);
+        outputTextArea.setFont(new Font("Monospaced", Font.PLAIN, 14));
 
-        // Matrix display area
         matrixDisplayArea = new JTextArea(15, 30);
         matrixDisplayArea.setEditable(false);
         matrixDisplayArea.setFont(new Font("Monospaced", Font.PLAIN, 20));
 
-        // Add components to center panels
         centerLeftPanel.add(new JLabel("Key Matrix:"));
         centerMiddlePanel.add(new JLabel("Input Text:"));
         centerRightPanel.add(new JLabel("Output Text: "));
@@ -97,10 +84,15 @@ public class Main extends JFrame {
         centerPanel.add(centerMiddlePanel);
         centerPanel.add(centerRightPanel);
 
-        // Process button
-        JButton processButton = new JButton("Process");
-        processButton.addActionListener(e -> processText());
-        bottomPanel.add(processButton);
+        JButton encryptButton = new JButton("Encrypt");
+        JButton decryptButton = new JButton("Decrypt");
+
+        encryptButton.addActionListener(e -> processText(true));
+        decryptButton.addActionListener(e -> processText(false));
+
+        bottomPanel.add(encryptButton);
+        bottomPanel.add(Box.createHorizontalStrut(20));
+        bottomPanel.add(decryptButton);
 
         // Add all panels to frame
         add(topPanel, BorderLayout.NORTH);
@@ -119,8 +111,38 @@ public class Main extends JFrame {
         setLocationRelativeTo(null);
     }
 
+    private void processText(boolean isEncrypting) {
+        try {
+            String input = inputTextArea.getText().toUpperCase().replaceAll("[^A-Z]", "").replace("J", "K");
+
+            if (isEncrypting) {
+                String encryptedText = encrypt(input);
+                outputTextArea.setText(encryptedText);
+            } else {
+                String decryptedText = decrypt(input);
+                Set<String> possibilities = getAllPossibleTexts(decryptedText);
+
+                StringBuilder output = new StringBuilder();
+                output.append("All possible variations:\n");
+                int count = 1;
+
+                List<String> sortedPossibilities = new ArrayList<>(possibilities);
+                Collections.sort(sortedPossibilities);
+
+                for (String text : sortedPossibilities) {
+                    output.append(count++).append(". ").append(text).append("\n");
+                }
+                outputTextArea.setText(output.toString());
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Error processing text: " + e.getMessage(),
+                    "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+
     private void updateMatrix() {
-        keyword = keywordField.getText().toUpperCase().replaceAll("[^A-Z]", "").replace("Q", "P");
+        keyword = keywordField.getText().toUpperCase().replaceAll("[^A-Z]", "").replace("J", "K");
         getMatrixWithKey();
         displayMatrix();
     }
@@ -136,22 +158,60 @@ public class Main extends JFrame {
         matrixDisplayArea.setText(matrixStr.toString());
     }
 
-    private void processText() {
-        try {
-            String input = inputTextArea.getText().toUpperCase().replaceAll("[^A-Z]", "").replace("Q", "P");
-            String result;
+    private Set<String> getPossiblePQVariations(String text) {
+        Set<String> variations = new HashSet<>();
+        variations.add(text);
 
-            if (encryptButton.isSelected()) {
-                result = encrypt(input);
-            } else {
-                result = decrypt(input);
+        char[] chars = text.toCharArray();
+
+        List<Integer> pPositions = new ArrayList<>();
+        for (int i = 0; i < chars.length; i++) {
+            if (chars[i] == 'K') {
+                pPositions.add(i);
             }
-
-            outputTextArea.setText(result);
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Error processing text: " + e.getMessage(),
-                    "Error", JOptionPane.ERROR_MESSAGE);
         }
+
+        int n = pPositions.size();
+        for (int i = 1; i < (1 << n); i++) {
+            char[] newVariation = text.toCharArray();
+            for (int j = 0; j < n; j++) {
+                if ((i & (1 << j)) > 0) {
+                    newVariation[pPositions.get(j)] = 'J';
+                }
+            }
+            variations.add(new String(newVariation));
+        }
+
+        return variations;
+    }
+
+    private Set<String> getPossibleTexts(String decryptedText) {
+        Set<String> possibilities = new HashSet<>();
+        possibilities.add(decryptedText);
+
+        if (decryptedText.endsWith("X")) {
+            possibilities.add(decryptedText.substring(0, decryptedText.length() - 1));
+        }
+
+        StringBuilder temp = new StringBuilder(decryptedText);
+        for (int i = 0; i < temp.length() - 2; i++) {
+            if (temp.charAt(i + 1) == 'X' && temp.charAt(i) == temp.charAt(i + 2)) {
+                String possibility = temp.substring(0, i + 1) + temp.substring(i + 2);
+                possibilities.add(possibility);
+            }
+        }
+
+        return possibilities;
+    }
+
+    private Set<String> getAllPossibleTexts(String decryptedText) {
+        Set<String> possibilities = getPossibleTexts(decryptedText);
+        Set<String> allPossibilities = new HashSet<>();
+        for (String text : possibilities) {
+            allPossibilities.addAll(getPossiblePQVariations(text));
+        }
+
+        return allPossibilities;
     }
 
     private void getMatrixWithKey() {
@@ -167,7 +227,7 @@ public class Main extends JFrame {
         }
 
         for (char c = 'A'; c <= 'Z'; c++) {
-            if (c == 'Q') continue;
+            if (c == 'J') continue;
             if (!used[c - 'A']) {
                 keyMatrix[index / MATRIX_SIZE][index % MATRIX_SIZE] = c;
                 used[c - 'A'] = true;
