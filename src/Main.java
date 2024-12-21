@@ -13,8 +13,6 @@ public class Main extends JFrame {
     private JTextArea inputTextArea;
     private JTextArea outputTextArea;
     private JTextArea matrixDisplayArea;
-    private JRadioButton encryptButton;
-    private JRadioButton decryptButton;
 
     public Main() {
         setTitle("Playfair Cipher");
